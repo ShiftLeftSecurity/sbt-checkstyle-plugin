@@ -20,7 +20,8 @@ object CheckstylePlugin extends AutoPlugin {
     val checkstyleOutputFile = SettingKey[File]("checkstyle-target", "The location of the generated checkstyle report")
     val checkstyleConfigLocation = SettingKey[CheckstyleConfigLocation]("checkstyle-config-location", "The location of the checkstyle configuration file")
     val checkstyleXsltTransformations = SettingKey[Option[Set[CheckstyleXSLTSettings]]]("xslt-transformations", "An optional set of XSLT transformations to be applied to the checkstyle output")
-    val checkstyleSeverityLevel = SettingKey[Option[CheckstyleSeverityLevel]]("checkstyle-severity-level", "Sets the severity levels which should fail the build")
+    val checkstyleSeverityLevel = SettingKey[Option[CheckstyleSeverityLevel]]("checkstyle-severity-level", "Sets the severity levels which are handled")
+    val checkstyleTerminateBuild = SettingKey[Option[Boolean]]("checkstyle-terminate-build", "Switch deciding whether checkstyle findings fail the build")
 
     val CheckstyleConfigLocation = com.etsy.sbt.checkstyle.CheckstyleConfigLocation
     val CheckstyleSeverityLevel = com.etsy.sbt.checkstyle.CheckstyleSeverityLevel
@@ -33,7 +34,8 @@ object CheckstylePlugin extends AutoPlugin {
       */
     def checkstyleTask(conf: Configuration): Initialize[Task[Unit]] = Def.task {
       Checkstyle.checkstyle((javaSource in conf).value, (resources in Compile).value, (checkstyleOutputFile in conf).value, (checkstyleConfigLocation in conf).value,
-        (checkstyleXsltTransformations in conf).value, (checkstyleSeverityLevel in conf).value, streams.value)
+        (checkstyleXsltTransformations in conf).value, (checkstyleSeverityLevel in conf).value,
+        (checkstyleTerminateBuild in conf).value, streams.value)
     }
   }
 
@@ -43,7 +45,8 @@ object CheckstylePlugin extends AutoPlugin {
 
   private lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
     checkstyleXsltTransformations := None,
-    checkstyleSeverityLevel := None
+    checkstyleSeverityLevel := None,
+    checkstyleTerminateBuild := None
   )
 
   override lazy val projectSettings: Seq[Def.Setting[_]] = Seq(

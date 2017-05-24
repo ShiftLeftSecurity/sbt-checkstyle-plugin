@@ -8,6 +8,7 @@ import net.sf.saxon.s9api.Processor
 import sbt.Keys._
 import sbt._
 
+
 /**
   * A Scala wrapper around the Checkstyle Java API
   *
@@ -25,10 +26,24 @@ object Checkstyle {
     * @param severityLevel The severity level used to fail the build.
     */
   def checkstyle(javaSource: File, resources: Seq[File], outputFile: File, configLocation: CheckstyleConfigLocation,
-                 xsltTransformations: Option[Set[CheckstyleXSLTSettings]], severityLevel: Option[CheckstyleSeverityLevel], streams: TaskStreams): Unit = {
+                 xsltTransformations: Option[Set[CheckstyleXSLTSettings]], severityLevel: Option[CheckstyleSeverityLevel],
+                 terminateBuild: Option[Boolean], streams: TaskStreams): Unit = {
     val outputLocation = outputFile.absolutePath
     val targetFolder = outputFile.getParentFile
     val configFile = targetFolder + "/checkstyle-config.xml"
+    val terminateBuildBool =
+      if (terminateBuild.isDefined) {
+        terminateBuild.get
+      } else {
+        true
+      }
+
+    val logLevel =
+      if (terminateBuildBool) {
+        Level.Error
+      } else {
+        Level.Warn
+      }
 
     targetFolder.mkdirs()
 
@@ -58,11 +73,13 @@ object Checkstyle {
 
     if (file(outputLocation).exists && severityLevel.isDefined) {
       val log = streams.log
-      val issuesFound = processIssues(log, outputLocation, severityLevel.get)
+      val issuesFound = processIssues(log, logLevel, outputLocation, severityLevel.get, terminateBuildBool)
 
       if (issuesFound > 0) {
-        log.error(issuesFound + " issue(s) found in Checkstyle report: " + outputLocation + "")
-        sys.exit(1)
+        log.log(logLevel, issuesFound + " issue(s) found in Checkstyle report: " + outputLocation + "")
+        if (terminateBuildBool) {
+          sys.exit(1)
+        }
       }
     }
   }
@@ -75,7 +92,8 @@ object Checkstyle {
     * @param severityLevel The severity level at which to fail the build if style issues exist at that level
     * @return A count of the total number of issues processed
     */
-  private def processIssues(log: Logger, outputLocation: String, severityLevel: CheckstyleSeverityLevel): Int = {
+  private def processIssues(log: Logger, logLevel: Level.Value, outputLocation: String, severityLevel: CheckstyleSeverityLevel,
+                            terminateBuildBool: Boolean): Int = {
     val report = scala.xml.XML.loadFile(file(outputLocation))
     val checkstyleSeverityLevelIndex = CheckstyleSeverityLevel.values.toArray.indexOf(severityLevel)
     val appliedCheckstyleSeverityLevels = CheckstyleSeverityLevel.values.drop(checkstyleSeverityLevelIndex)
@@ -89,7 +107,7 @@ object Checkstyle {
           case true => val lineNumber = error.attribute("line").get.head.text
             val filename = file.attribute("name").get.head.text
             val errorMessage = error.attribute("message").get.head.text
-            log.error("Checkstyle " + severity + " found in " + filename + ":" + lineNumber + ": " + errorMessage)
+            log.log(logLevel, "Checkstyle " + severity + " found in " + filename + ":" + lineNumber + ": " + errorMessage)
             1
         }
       }
