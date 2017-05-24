@@ -4,7 +4,7 @@ name := "sbt-checkstyle-plugin"
 
 organization := "io.shiftleft" /* TODO: change back to com.etsy once PR to etsy is merged */
 
-version := "3.1.1-SNAPSHOT"
+version := "3.1.1"
 
 scalaVersion := "2.10.4"
 
@@ -47,21 +47,6 @@ pomExtra := <url>https://github.com/ShiftLeftSecurity/sbt-checkstyle-plugin</url
       <url>github.com/ajsquared</url>
     </developer>
   </developers>
-
-// artifactId doesn't contain scala and sbt version... not sure why
-pomPostProcess := { _ match {
-  case root: scala.xml.Elem => 
-    val artifactIdOld = root \ "artifactId"
-    val artifactIdNew = <artifactId>{artifactIdOld.text}_2.10_0.13</artifactId>
-    val newChild = root.child.map {
-      case node if node.label == "artifactId" =>
-        <artifactId>{node.text}_2.10_0.13</artifactId>
-      case x => x
-    }
-    root.copy(child = newChild)
-  }
-}
-
 
 scalastyleConfig := file("scalastyle.xml")
 
