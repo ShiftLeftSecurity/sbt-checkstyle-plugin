@@ -4,7 +4,7 @@ name := "sbt-checkstyle-plugin"
 
 organization := "io.shiftleft" /* TODO: change back to com.etsy once PR to etsy is merged */
 
-version := "3.1.1"
+version := "3.1.2-SNAPSHOT"
 
 scalaVersion := "2.10.4"
 
