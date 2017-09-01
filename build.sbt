@@ -4,19 +4,17 @@ name := "sbt-checkstyle-plugin"
 
 organization := "io.shiftleft" /* TODO: change back to com.etsy once PR to etsy is merged */
 
-version := "3.1.2-SNAPSHOT"
+version := "3.2.0"
 
-scalaVersion := "2.10.4"
+scalaVersion := "2.12.3"
 
 libraryDependencies ++= Seq(
   "com.puppycrawl.tools" % "checkstyle" % "6.15",
   "net.sf.saxon" % "Saxon-HE" % "9.6.0-5",
-  "org.scalatest" % "scalatest_2.10" % "2.2.1" % "test",
-  "junit" % "junit" % "4.11" % "test",
-  "com.github.stefanbirkner" % "system-rules" % "1.6.0" % "test"
+  "org.scalatest" %% "scalatest" % "3.0.3" % Test,
+  "junit" % "junit" % "4.12" % Test,
+  "com.github.stefanbirkner" % "system-rules" % "1.6.0" % Test
 )
-
-xerial.sbt.Sonatype.sonatypeSettings
 
 publishTo := {
   val jfrog = "https://shiftleft.jfrog.io/shiftleft/"
